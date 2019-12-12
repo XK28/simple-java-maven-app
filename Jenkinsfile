@@ -16,10 +16,10 @@ pipeline {
         }
         stage('Sonarqube') {
     environment {
-        scannerHome = tool 'SonarQubeScanner'
+        scannerHome = tool 'GLW SonarQube Scanner'
     }
     steps {
-        withSonarQubeEnv('sonarqube') {
+        withSonarQubeEnv('GLW SonarQube Server') {
             sh "${scannerHome}/bin/sonar-scanner"
         }
             timeout(time: 10, unit: 'MINUTES') {
