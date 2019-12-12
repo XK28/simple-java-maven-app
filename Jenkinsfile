@@ -20,11 +20,7 @@ pipeline {
                 sh 'mvn sonar:sonar'
                   }
             }
-            post {
-                always {
-                    junit 'target/surefire-reports/*.xml'
-                }
-            }
+            
         }
         stage('Deliver') { 
             steps {
