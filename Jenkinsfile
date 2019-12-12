@@ -1,11 +1,13 @@
-node {
-  stage('SCM') {
-    git 'https://github.com/NekoNoName/simple-java-maven-app.git'
-  }
-  stage('SonarQube analysis') {
-     def scannerHome = tool 'GLW SonarQube Scanner';
-        withSonarQubeEnv('GLW SonarQube Server') { 
-             sh "${mvnHome}/bin/mvn sonar:sonar"
+stage('Sonarqube') {
+    environment {
+        scannerHome = tool 'GLW SonarQube Scanner'
     }
-  }
+    steps {
+        withSonarQubeEnv('GLW SonarQube Server') {
+            sh "${scannerHome}/bin/sonar-scanner"
+        }
+        timeout(time: 10, unit: 'MINUTES') {
+            waitForQualityGate abortPipeline: true
+        }
+    }
 }
