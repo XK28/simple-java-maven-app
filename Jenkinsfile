@@ -1,28 +1,32 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'maven:3-alpine'
+            args '-v /root/.m2:/root/.m2'
+        }
+    }
+    options {
+        skipStagesAfterUnstable()
+    }
     stages {
-        stage('SCM') {
+        stage('Build') {
             steps {
-                git url: 'https://github.com/NekoNoName/simple-java-maven-app.git'
+                sh 'mvn -B -DskipTests clean package'
             }
         }
-        stage('build && SonarQube analysis') {
+        stage('Test') {
             steps {
-                withSonarQubeEnv('GLW SonarQube Server') {
-                    // Optionally use a Maven environment you've configured already
-                    
-                        sh 'mv sonar:sonar'
-                   
+                sh 'mvn sonar:sonar'
+            }
+            post {
+                always {
+                    junit 'target/surefire-reports/*.xml'
                 }
             }
         }
-        stage("Quality Gate") {
+        stage('Deliver') { 
             steps {
-                timeout(time: 1, unit: 'HOURS') {
-                    // Parameter indicates whether to set pipeline to UNSTABLE if Quality Gate fails
-                    // true = set pipeline to UNSTABLE, false = don't
-                    waitForQualityGate abortPipeline: true
-                }
+                sh './jenkins/scripts/deliver.sh' 
             }
         }
     }
