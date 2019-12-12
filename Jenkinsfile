@@ -16,7 +16,9 @@ pipeline {
         }
         stage('Test') {
             steps {
+                  withSonarQubeEnv('My SonarQube Server') {
                 sh 'mvn sonar:sonar'
+                  }
             }
             post {
                 always {
