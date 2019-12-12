@@ -1,36 +1,10 @@
-pipeline {
-    agent {
-        docker {
-            image 'maven:3-alpine'
-            args '-v /root/.m2:/root/.m2'
-        }
+node {
+  stage('SCM') {
+    git 'https://github.com/NekoNoName/simple-java-maven-app.git'
+  }
+  stage('SonarQube analysis') {
+    withSonarQubeEnv() { // Will pick the global server connection you have configured
+      sh './gradlew sonarqube'
     }
-    options {
-        skipStagesAfterUnstable()
-    }
-    stages {
-        stage('Build') {
-            steps {
-                sh 'mvn -B -DskipTests clean package'
-            }
-        }
-        stage('Sonarqube') {
-    environment {
-        scannerHome = tool 'GLW SonarQube Scanner'
-    }
-    steps {
-        withSonarQubeEnv('GLW SonarQube Server') {
-            sh "${scannerHome}/bin/sonar-scanner"
-        }
-            timeout(time: 10, unit: 'MINUTES') {
-            waitForQualityGate abortPipeline: true
-            }
-        }
-    }
-        stage('Deliver') { 
-            steps {
-                sh './jenkins/scripts/deliver.sh' 
-            }
-        }
-    }
+  }
 }
